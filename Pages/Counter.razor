@@ -49,7 +49,7 @@
         outStream.Seek(0, SeekOrigin.Begin);
         StreamReader reader = new StreamReader(outStream);
         md = reader.ReadToEnd();
-        var module = await JS.InvokeAsync<IJSObjectReference>("import", "../download.js");
-        await module.InvokeVoidAsync("downloadBlob", md, "test.md", "application/octet-stream");
+        //var module = await JS.InvokeAsync<IJSObjectReference>("import", "../main.js");
+        await JS.InvokeVoidAsync("downloadBlob", md, "test.md", "application/octet-stream");
     }
 }
