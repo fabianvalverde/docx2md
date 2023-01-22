@@ -12,7 +12,10 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-<InputFile OnChange="@convertToMd" accept=".docx" id="docxFile"/>
+<Input type="file" onchange="convertToMd(this)" accept=".docx" id="docxFile" />
+
+@* Method to call C# with an inputfile *@
+@* <InputFile OnChange="@convertToMd" accept=".docx" id="docxFile"/> *@
 
 @* <input id="docxFile" type="file" placeholder="Give me a docx file" accept=".docx"><input>
     <input id="mdFile" type="file" placeholder="Give me a md file" accept=".md"><input> *@
@@ -25,20 +28,33 @@
         currentCount++;
     }
 
-    @* private IJSObjectReference? module;
-    private string? result; *@
+    private IJSObjectReference? module;
 
-    @* protected override async Task OnAfterRenderAsync(bool firstRender)
+    [JSInvokable]
+    public static string openDocxFile(byte[] file)
     {
-        if (firstRender)
+        return docxToMd(file).Result;
+    }
+
+    public static async Task<string> docxToMd(byte[] file)
+    {
+        string md;
+        var outStream = new MemoryStream();
+
+        using (MemoryStream data = new MemoryStream(file))
         {
-            module = await JS.InvokeAsync<IJSObjectReference>("import", 
-                "/Users/fabianvalverde/Documents/GitHub/blazor-wasm-docx2md/download.js");
+            await DgDocx.docx_to_md(data, outStream);
+            StreamReader reader = new StreamReader(outStream);
+            outStream.Seek(0, SeekOrigin.Begin);
+            md = reader.ReadToEnd();
         }
-    } *@
+        return md;
+    }
 
-    public async Task convertToMd(InputFileChangeEventArgs e)
-    {
+
+    //A method to convert to Md calling JS
+    @* public async Task convertToMd(InputFileChangeEventArgs e)
+        {
         var outStream = new MemoryStream();
         String md;
 
@@ -51,5 +67,5 @@
         md = reader.ReadToEnd();
         //var module = await JS.InvokeAsync<IJSObjectReference>("import", "../main.js");
         await JS.InvokeVoidAsync("downloadBlob", md, "test.md", "application/octet-stream");
-    }
+        }*@
 }
