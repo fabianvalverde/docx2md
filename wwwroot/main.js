@@ -44,7 +44,7 @@ function convertToMd(input){
   var reader = new FileReader();
   reader.onload = function(e) {
     // The file's text will be printed here
-    var string = DotNet.invokeMethodAsync("blazor-wasm-docx2md", "openDocxFile", new Uint8Array(reader.result));
+    var string = DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", new Uint8Array(reader.result));
 
     downloadBlob(string, 'test.md', 'application/octet-stream');
   };
