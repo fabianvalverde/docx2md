@@ -1,5 +1,6 @@
 ﻿@using docx_lib;
 @using System.IO;
+@using System.Text;
 @inject IJSRuntime JS;
 
 @page "/counter"
@@ -12,7 +13,8 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-<Input type="file" onchange="convertToMd(this)" accept=".docx" id="docxFile" />
+<Input type="file" onchange="convertToMd(this)" accept=".docx"/>
+<Input type="file" onchange="convertToDocx(this)" accept=".md"/>
 
 @* Method to call C# with an inputfile *@
 @* <InputFile OnChange="@convertToMd" accept=".docx" id="docxFile"/> *@
@@ -50,6 +52,26 @@
         }
         return md;
     }
+
+    [JSInvokable]
+        public static byte[] openMdFile(byte[] file)
+        {
+            return convertToDocx(file).Result;//Returns a stream
+        }
+
+        public static async Task<byte[]> convertToDocx(byte[] data)
+        {
+
+            string stringData = Encoding.UTF8.GetString(data);
+
+            var outStream = new MemoryStream();
+
+            await DgDocx.md_to_docx(stringData, outStream);
+
+            byte[] outData = outStream.ToArray();
+
+            return outData;
+        }
 
 
     //A method to convert to Md calling JS

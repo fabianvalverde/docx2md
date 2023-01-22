@@ -37,6 +37,7 @@
 //     reader.readAsArrayBuffer(file);
 // }, true);
 
+
 function convertToMd(input){
 
   const file = input.files[0];
@@ -51,6 +52,21 @@ function convertToMd(input){
 
   reader.readAsArrayBuffer(file);
 }
+
+
+function convertToDocx(input){
+  const file = input.files[0];
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+
+  var byte = DotNet.invokeMethodAsync("blazorwasm", "openMdFile", new Uint8Array(reader.result));;
+
+  downloadBlob(byte, 'test.docx', 'application/octet-stream');
+  }
+  reader.readAsArrayBuffer(file)
+}
+
 
 function downloadBlob(data, fileName, mimeType) {
     var blob = new Blob([data], {
