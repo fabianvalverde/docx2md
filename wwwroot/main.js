@@ -62,7 +62,7 @@ function convertToDocx(input){
 
   var byte = DotNet.invokeMethodAsync("blazorwasm", "openMdFile", new Uint8Array(reader.result));;
 
-  downloadBlob(byte, 'test.docx', 'application/octet-stream');
+  downloadBlob(byte, "test.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
   }
   reader.readAsArrayBuffer(file)
 }
