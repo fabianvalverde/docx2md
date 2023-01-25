@@ -1,43 +1,3 @@
-// const df = document.getElementById('docxFile')
-// const mf = document.getElementById('mdFile')
-// console.log("attaching...", df)
-
-
-// function downloadMdFile(){
-
-// }
-
-// df.addEventListener('change', (event) => {
-//     const file = event.target.files[0]
-//     console.log(file)
-//     var reader = new FileReader();
-//     reader.onload = async (event) => {
-//         //console.log("xx", event)
-//         //console.log(reader.result);
-//         //console.log(exports.TodoMVC.MainJS.openFile(new Uint8Array(reader.result)))
-//         var string = exports.TodoMVC.MainJS.openDocxFile(new Uint8Array(reader.result));
-
-//         downloadBlob(string, 'test.md', 'application/octet-stream');
-//     }
-//     reader.readAsArrayBuffer(file);
-// }, true);
-
-// mf.addEventListener('change', (event) => {
-//     const file = event.target.files[0]
-//     console.log(file)
-//     var reader = new FileReader();
-//     reader.onload = async (event) => {
-//         //console.log("xx", event)
-//         //console.log(reader.result);
-//         //console.log(exports.TodoMVC.MainJS.openFile(new Uint8Array(reader.result)))
-//         var string = exports.TodoMVC.MainJS.openFile(new Uint8Array(reader.result));
-
-//         downloadBlob(string, 'test.md', 'application/octet-stream');
-//     }
-//     reader.readAsArrayBuffer(file);
-// }, true);
-
-
 function convertToMd(input) {
 
   const file = input.files[0];
@@ -49,10 +9,8 @@ function convertToMd(input) {
 
     downloadBlob(string, 'test.md', 'application/octet-stream');
   };
-
   reader.readAsArrayBuffer(file);
 }
-
 
 function convertToDocx(input) {
   const file = input.files[0];
@@ -60,13 +18,13 @@ function convertToDocx(input) {
   var reader = new FileReader();
   reader.onload = async function (e) {
 
-    var byte = await DotNet.invokeMethodAsync("blazorwasm", "openMdFile", new Uint8Array(reader.result));;
+    var md = window.markdownit();
+    var htmlFile = md.render(reader.result);
 
-    downloadBlob(byte, "test.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    readImages(htmlFile);
   }
-  reader.readAsArrayBuffer(file)
+  reader.readAsBinaryString(file);
 }
-
 
 function downloadBlob(data, fileName, mimeType) {
   var blob = new Blob([data], {
@@ -89,3 +47,43 @@ var downloadURL = function (data, fileName) {
   a.click();
   a.remove();
 };
+
+function readImages(htmlFile) {
+  let text = "";
+  let tags = [];
+  let insideTag = false;
+  let currentTag = "";
+
+  for (let i = 0; i < htmlString.length; i++) {
+    if (htmlString[i] === "<") {
+      insideTag = true;
+      currentTag = "<";
+    } else if (htmlString[i] === ">") {
+      insideTag = false;
+      currentTag += ">";
+      tags.push(currentTag);
+    } else if (insideTag) {
+      currentTag += htmlString[i];
+    } else {
+      text += htmlString[i];
+    }
+  }
+
+  return { text: text, tags: tags };
+}
+
+
+
+//Previous convertToDocx (Doesn't work because of CORS)
+// function convertToDocx(input) {
+//   const file = input.files[0];
+
+//   var reader = new FileReader();
+//   reader.onload = async function (e) {
+
+//     var byte = await DotNet.invokeMethodAsync("blazorwasm", "openMdFile", new Uint8Array(reader.result));;
+
+//     downloadBlob(byte, "test.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+//   }
+//   reader.readAsArrayBuffer(file)
+// }
