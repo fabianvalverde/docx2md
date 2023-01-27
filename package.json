@@ -1,5 +1,8 @@
+
 {
+  
   "dependencies": {
+    "jszip": "^3.10.1",
     "rehype-sanitize": "^5.0.1",
     "rehype-slug": "^5.1.0",
     "rehype-stringify": "^9.0.3",

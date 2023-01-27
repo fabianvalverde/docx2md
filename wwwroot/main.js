@@ -1,3 +1,5 @@
+import * as JSZip from './jszip.min.js';
+
 function convertToMd(input) {
 
   const file = input.files[0];
@@ -15,16 +17,22 @@ function convertToMd(input) {
 function convertToDocx(input) {
   const file = input.files[0];
 
-  var reader = new FileReader();
-  reader.onload = async function (e) {
+  var jszip = new JSZip();
 
-    var md = window.markdownit();
-    var htmlFile = md.render(reader.result);
-
-    readImages(htmlFile);
-  }
-  reader.readAsBinaryString(file);
-}
+  jszip.loadAsync(file).then(function (zip) {
+    zip.forEach(function (relativePath, zipEntry) {
+      if (!zipEntry.dir) {
+        // This is not a folder, so skip it
+        return;
+      }
+      if (zipEntry.name === 'images') {
+        // This is the folder we're looking for
+        console.log("Found folder: " + zipEntry.name);
+        // Do something with the folder here
+      }
+    });
+  })
+};
 
 function downloadBlob(data, fileName, mimeType) {
   var blob = new Blob([data], {
@@ -48,29 +56,20 @@ var downloadURL = function (data, fileName) {
   a.remove();
 };
 
-function readImages(htmlFile) {
-  let text = "";
-  let tags = [];
-  let insideTag = false;
-  let currentTag = "";
+// async function readImages(htmlFile) {
+//   const parser = new DOMParser();
+//   let response
 
-  for (let i = 0; i < htmlString.length; i++) {
-    if (htmlString[i] === "<") {
-      insideTag = true;
-      currentTag = "<";
-    } else if (htmlString[i] === ">") {
-      insideTag = false;
-      currentTag += ">";
-      tags.push(currentTag);
-    } else if (insideTag) {
-      currentTag += htmlString[i];
-    } else {
-      text += htmlString[i];
-    }
-  }
+//   const htmlTags = parser.parseFromString(htmlFile, "text/html");
 
-  return { text: text, tags: tags };
-}
+//   const imgTags = htmlTags.querySelectorAll("img");
+//   for (const jpg of imgTags) {
+//     console.log(jpg.src);
+//     const result = await fetch(jpg.src);
+//   }
+
+//   imgTags.push(htmlTags.querySelector("img").forEach((e) => e.src));
+// }
 
 
 
