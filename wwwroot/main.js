@@ -1,6 +1,6 @@
 import * as JSZip from './jszip.min.js';
 
-function convertToMd(input) {
+window.convertToMd = (input) => {
 
   const file = input.files[0];
 
@@ -14,20 +14,22 @@ function convertToMd(input) {
   reader.readAsArrayBuffer(file);
 }
 
-function convertToDocx(input) {
+window.convertToDocx = (input) => {
   const file = input.files[0];
 
-  var jszip = new JSZip();
+  const zipVar = new window.JSZip()
 
-  jszip.loadAsync(file).then(function (zip) {
+
+  
     zip.forEach(function (relativePath, zipEntry) {
       if (!zipEntry.dir) {
         // This is not a folder, so skip it
         return;
       }
-      if (zipEntry.name === 'images') {
+      if (zipEntry.name === 'images/') {
         // This is the folder we're looking for
         console.log("Found folder: " + zipEntry.name);
+        zipEntry.folder("images/").file
         // Do something with the folder here
       }
     });
