@@ -17,19 +17,12 @@ window.convertToMd = (input) => {
 window.convertToDocx = (input) => {
   const file = input.files[0];
 
-  const zipVar = new window.JSZip()
-
-
-  
+  const jszip = new window.JSZip();
+  jszip.loadAsync(file).then(function (zip) {
     zip.forEach(function (relativePath, zipEntry) {
-      if (!zipEntry.dir) {
-        // This is not a folder, so skip it
-        return;
-      }
       if (zipEntry.name === 'images/') {
         // This is the folder we're looking for
         console.log("Found folder: " + zipEntry.name);
-        zipEntry.folder("images/").file
         // Do something with the folder here
       }
     });
