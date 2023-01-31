@@ -21,9 +21,18 @@ window.convertToDocx = (input) => {
   jszip.loadAsync(file).then(function (zip) {
     zip.forEach(function (relativePath, zipEntry) {
       if (zipEntry.name === 'images/') {
-        // This is the folder we're looking for
-        console.log("Found folder: " + zipEntry.name);
-        // Do something with the folder here
+        zip.folder("images/").forEach(function (relativePath, file) {
+          if (!file.dir) {
+            console.log("arrived");
+          }
+      });
+      }
+      if (zipEntry.name === 'articles/') {
+        zip.folder("articles/").forEach(function (relativePath, file) {
+          if (!file.dir) {
+              console.log("arrived");
+          }
+      });
       }
     });
   })
