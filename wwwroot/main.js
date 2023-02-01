@@ -26,19 +26,16 @@ window.convertToDocx = (input) => {
   jszip.loadAsync(file).then(function (zip) {
     zip.forEach(function (relativePath, zipEntry) {
       if (zipEntry.name === 'images/') {
-        zip.folder("images/").forEach(function (relativePath, file) {
+        zip.folder("images/").forEach(function (relativePath, zipFile) {
           if (!file.dir) {
-            console.log(file);
-            //   images.push(new Image("image1.jpg", "#ff0000"));
-            var reader = new FileReader();
-            reader.onload = async function (e) {
+            console.log(zipFile);
+               
               // The file's text will be printed here
-              var imageBytes = new Uint8Array(reader.result);
-              let imageHex = convertToHex(image);
-            };
-            reader.readAsArrayBuffer(file);
+              let imageHex = convertToHex(zipFile._data.compressedContent);
+              images.push(new Image(zipFile.name, imageHex));
           }
-      });
+      })
+
       }
       if (zipEntry.name === 'articles/') {
         zip.folder("articles/").forEach(function (relativePath, file) {
