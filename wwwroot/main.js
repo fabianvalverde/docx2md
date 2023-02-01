@@ -1,4 +1,6 @@
 import * as JSZip from './jszip.min.js';
+import Image from "./images.js";
+
 
 window.convertToMd = (input) => {
 
@@ -15,15 +17,26 @@ window.convertToMd = (input) => {
 }
 
 window.convertToDocx = (input) => {
-  const file = input.files[0];
 
+  const file = input.files[0];
   const jszip = new window.JSZip();
+  const images = [];
+
+  
   jszip.loadAsync(file).then(function (zip) {
     zip.forEach(function (relativePath, zipEntry) {
       if (zipEntry.name === 'images/') {
         zip.folder("images/").forEach(function (relativePath, file) {
           if (!file.dir) {
-            console.log("arrived");
+            console.log(file);
+            //   images.push(new Image("image1.jpg", "#ff0000"));
+            var reader = new FileReader();
+            reader.onload = async function (e) {
+              // The file's text will be printed here
+              var imageBytes = new Uint8Array(reader.result);
+              let imageHex = convertToHex(image);
+            };
+            reader.readAsArrayBuffer(file);
           }
       });
       }
@@ -37,6 +50,24 @@ window.convertToDocx = (input) => {
     });
   })
 };
+
+//-------------------------------------------------
+// Function below is to convert and image to hex format
+//-------------------------------------------------
+
+function convertToHex(image) {
+    let hex = '';
+    const hexArray = image;
+    hexArray.forEach(function (byte) {
+      hex += byte.toString(16).padStart(2, '0');
+    });
+    console.log(hex);
+    return hex;
+}
+
+//-------------------------------------------------
+// Functions below are to download the files after the conversion
+//-------------------------------------------------
 
 function downloadBlob(data, fileName, mimeType) {
   var blob = new Blob([data], {
@@ -59,6 +90,11 @@ var downloadURL = function (data, fileName) {
   a.click();
   a.remove();
 };
+
+
+//-------------------------------------------------
+// Functions below failed
+//-------------------------------------------------
 
 // async function readImages(htmlFile) {
 //   const parser = new DOMParser();
