@@ -1,11 +1,11 @@
 import * as JSZip from './jszip.min.js';
 import Image from "./images.js";
-import {unified} from './node_modules/unified/index.js';
-import remarkParse from './node_modules/remark-parse/';
-import remarkRehype from './node_modules/remark-rehype/';
-import rehypeStringify from './node_modules/rehype-stringify/';
-import rehypeSanitize from './node_modules/rehype-sanitize/';
-import rehypeSlug from './node_modules/rehype-slug/';
+//import {unified} from './node_modules/unified/index.js';
+// import remarkParse from './node_modules/remark-parse/index.js';
+// import remarkRehype from './node_modules/remark-rehype/index.js';
+// import rehypeStringify from './node_modules/rehype-stringify/index.js';
+// import rehypeSanitize from './node_modules/rehype-sanitize/index.js';
+// import rehypeSlug from './node_modules/rehype-slug/index.js';
 
 
 window.convertToMd = (input) => {
@@ -48,7 +48,7 @@ window.convertToDocx = (input) => {
           if (!file.dir) {
               console.log("arrived");
               console.log(file.name);
-              md2html(file);
+              //md2html(file);
           }
       });
       }
@@ -60,16 +60,16 @@ window.convertToDocx = (input) => {
 // Function below is to convert .md file to html
 //-------------------------------------------------
 
-async function md2html(md){
-  const file = await unified()
-      .use(remarkParse)
-      .use(remarkRehype)
-      .use(rehypeSanitize)
-      .use(rehypeStringify)
-      .use(rehypeSlug)
-      .process(md ?? "error")
-  return String(file)
-}
+// async function md2html(md){
+//   const file = await unified()
+//       .use(remarkParse)
+//       .use(remarkRehype)
+//       .use(rehypeSanitize)
+//       .use(rehypeStringify)
+//       .use(rehypeSlug)
+//       .process(md ?? "error")
+//   return String(file)
+// }
 
 
 //-------------------------------------------------
