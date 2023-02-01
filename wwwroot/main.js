@@ -1,5 +1,11 @@
 import * as JSZip from './jszip.min.js';
 import Image from "./images.js";
+import {unified} from './node_modules/unified/index.js';
+import remarkParse from './node_modules/remark-parse/';
+import remarkRehype from './node_modules/remark-rehype/';
+import rehypeStringify from './node_modules/rehype-stringify/';
+import rehypeSanitize from './node_modules/rehype-sanitize/';
+import rehypeSlug from './node_modules/rehype-slug/';
 
 
 window.convertToMd = (input) => {
@@ -42,6 +48,7 @@ window.convertToDocx = (input) => {
           if (!file.dir) {
               console.log("arrived");
               console.log(file.name);
+              md2html(file);
           }
       });
       }
@@ -53,7 +60,7 @@ window.convertToDocx = (input) => {
 // Function below is to convert .md file to html
 //-------------------------------------------------
 
-export async function md2html(md){
+async function md2html(md){
   const file = await unified()
       .use(remarkParse)
       .use(remarkRehype)
