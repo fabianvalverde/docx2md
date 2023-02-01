@@ -41,12 +41,29 @@ window.convertToDocx = (input) => {
         zip.folder("articles/").forEach(function (relativePath, file) {
           if (!file.dir) {
               console.log("arrived");
+              console.log(file.name);
           }
       });
       }
     });
   })
 };
+
+//-------------------------------------------------
+// Function below is to convert .md file to html
+//-------------------------------------------------
+
+export async function md2html(md){
+  const file = await unified()
+      .use(remarkParse)
+      .use(remarkRehype)
+      .use(rehypeSanitize)
+      .use(rehypeStringify)
+      .use(rehypeSlug)
+      .process(md ?? "error")
+  return String(file)
+}
+
 
 //-------------------------------------------------
 // Function below is to convert and image to hex format
@@ -61,6 +78,7 @@ function convertToHex(image) {
     console.log(hex);
     return hex;
 }
+
 
 //-------------------------------------------------
 // Functions below are to download the files after the conversion
