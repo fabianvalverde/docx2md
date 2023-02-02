@@ -1,6 +1,6 @@
 import * as JSZip from './jszip.min.js';
 import Image from "./images.js";
-//import {unified} from './node_modules/unified/index.js';
+// import {unified} from './node_modules/unified/index.js';
 // import remarkParse from './node_modules/remark-parse/index.js';
 // import remarkRehype from './node_modules/remark-rehype/index.js';
 // import rehypeStringify from './node_modules/rehype-stringify/index.js';
@@ -26,35 +26,60 @@ window.convertToDocx = (input) => {
 
   const file = input.files[0];
   const jszip = new window.JSZip();
+  var jsonString = "";
+  var mdString = [];
   const images = [];
 
-  
-  jszip.loadAsync(file).then(function (zip) {
+
+  jszip.loadAsync(file).then(async function (zip) {
     zip.forEach(function (relativePath, zipEntry) {
       if (zipEntry.name === 'images/') {
         zip.folder("images/").forEach(function (relativePath, zipFile) {
           if (!file.dir) {
             console.log(zipFile);
-               
-              // The file's text will be printed here
-              let imageHex = convertToHex(zipFile._data.compressedContent);
-              images.push(new Image(zipFile.name, imageHex));
+
+            // The file's text will be printed here
+            let imageHex = convertToHex(zipFile._data.compressedContent);
+            images.push(new Image(zipFile.name, imageHex));
           }
-      })
+        })
 
       }
       if (zipEntry.name === 'articles/') {
         zip.folder("articles/").forEach(function (relativePath, file) {
           if (!file.dir) {
-              console.log("arrived");
-              console.log(file.name);
-              //md2html(file);
+            console.log("arrived");
+            console.log(file.name);
+            mdString.push(String.fromCharCode.apply(null, file._data.compressedContent));
+            //md2html(file);
           }
-      });
+        });
       }
     });
+    jsonString = createJsonImages(images);
+
+    //Here I need to pass the md array and json images. It'll return bytes.
+
+    var bytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", new Uint8Array(reader.result));
   })
+  
+
 };
+
+
+function createJsonImages(images) {
+
+  var json = {}
+
+  images.forEach(function (img) {
+    json[img.src] = img.hex;
+  });
+
+  var jsonString = JSON.stringify(json);
+
+  return jsonString;
+
+}
 
 //-------------------------------------------------
 // Function below is to convert .md file to html
@@ -77,13 +102,13 @@ window.convertToDocx = (input) => {
 //-------------------------------------------------
 
 function convertToHex(image) {
-    let hex = '';
-    const hexArray = image;
-    hexArray.forEach(function (byte) {
-      hex += byte.toString(16).padStart(2, '0');
-    });
-    console.log(hex);
-    return hex;
+  let hex = '';
+  const hexArray = image;
+  hexArray.forEach(function (byte) {
+    hex += byte.toString(16).padStart(2, '0');
+  });
+  console.log(hex);
+  return hex;
 }
 
 
