@@ -1,5 +1,6 @@
 ﻿@using docx_lib;
 @using System.IO;
+@using System.IO.Compression;
 @using System.Text;
 @inject IJSRuntime JS;
 
@@ -13,14 +14,14 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-<Input type="file" onchange="convertToMd(this)" accept=".docx"/>
-<Input type="file" onchange="convertToDocx(this)" accept=".md, .zip"/>
+<Input type="file" onchange="convertToMd(this)" accept=".docx" />
+<Input type="file" onchange="convertToDocx(this)" accept=".md, .zip" />
 
 @* Method to call C# with an inputfile *@
 @* <InputFile OnChange="@convertToMd" accept=".docx" id="docxFile"/> *@
 
 @* <input id="docxFile" type="file" placeholder="Give me a docx file" accept=".docx"><input>
-    <input id="mdFile" type="file" placeholder="Give me a md file" accept=".md"><input> *@
+<input id="mdFile" type="file" placeholder="Give me a md file" accept=".md"><input> *@
 
 @code {
     private int currentCount = 0;
@@ -54,40 +55,78 @@
     }
 
     [JSInvokable]
-        public static byte[] openMdFile(byte[] file)
-        {
-            return convertToDocx(file).Result;//Returns a stream
-        }
+    public static byte[] openMdFile(byte[] file)
+    {
+        return convertToDocx(file).Result;//Returns a stream
+    }
 
-        public static async Task<byte[]> convertToDocx(byte[] data)
-        {
+    public static async Task<byte[]> convertToDocx(byte[] data)
+    {
+        string stringData = Encoding.UTF8.GetString(data);
 
-            string stringData = Encoding.UTF8.GetString(data);
-
-            var outStream = new MemoryStream();
-
-            await DgDocx.md_to_docx(stringData, outStream);
-
-            byte[] outData = outStream.ToArray();
-
-            return outData;
-        }
-
-
-    //A method to convert to Md calling JS
-    @* public async Task convertToMd(InputFileChangeEventArgs e)
-        {
         var outStream = new MemoryStream();
-        String md;
 
-        MemoryStream data = new MemoryStream();
+        await DgDocx.md_to_docx(stringData, outStream);
 
-        await e.File.OpenReadStream(maxAllowedSize: long.MaxValue).CopyToAsync(data);
-        await DgDocx.docx_to_md(data, outStream);
-        outStream.Seek(0, SeekOrigin.Begin);
-        StreamReader reader = new StreamReader(outStream);
-        md = reader.ReadToEnd();
-        //var module = await JS.InvokeAsync<IJSObjectReference>("import", "../main.js");
-        await JS.InvokeVoidAsync("downloadBlob", md, "test.md", "application/octet-stream");
-        }*@
+        byte[] outData = outStream.ToArray();
+
+        return outData;
+    }
+
+
+    [JSInvokable]
+    public static byte[] openMdFile(String[] mdFiles, String images)
+    {
+        return convertToDocx(mdFiles, images).Result;//Returns a stream
+    }
+
+    public static async Task<byte[]> convertToDocx(String[] mdFiles, String images)
+    {
+        MemoryStream[] outStreamArray = new MemoryStream[mdFiles.Length];
+
+        await DgDocx.md_to_docx(mdFiles, images, outStreamArray);
+
+        using (FileStream fileStream = new FileStream("hello.docx", FileMode.Create, FileAccess.Write))
+        {
+            mem.CopyTo(fileStream);
+        }
+
+        using (FileStream fileStream = new FileStream("hello.docx", FileMode.Open, FileAccess.Read))
+        {
+            using (FileStream zipStream = new FileStream("hello.zip", FileMode.Create, FileAccess.Write))
+            {
+                using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+                {
+                    ZipArchiveEntry entry = archive.CreateEntry("hello.docx");
+                    using (Stream entryStream = entry.Open())
+                    {
+                        fileStream.CopyTo(entryStream);
+                    }
+                }
+            }
+        }
+
+        return outData;
+    }
 }
+
+
+@* //A method to convert to Md calling JS
+public async Task convertToMd(InputFileChangeEventArgs e){
+var outStream = new MemoryStream();
+String md;
+
+MemoryStream data = new MemoryStream();
+
+await e.File.OpenReadStream(maxAllowedSize: long.MaxValue).CopyToAsync(data);
+await DgDocx.docx_to_md(data, outStream);
+outStream.Seek(0, SeekOrigin.Begin);
+StreamReader reader = new StreamReader(outStream);
+md = reader.ReadToEnd();
+//var module = await JS.InvokeAsync<IJSObjectReference>("import", "../main.js");
+await JS.InvokeVoidAsync("downloadBlob", md, "test.md", "application/octet-stream");
+}
+
+}*@
+
+

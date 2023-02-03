@@ -58,9 +58,9 @@ window.convertToDocx = (input) => {
     });
     jsonString = createJsonImages(images);
 
-    //Here I need to pass the md array and json images. It'll return bytes.
+    var stringArray = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
 
-    var bytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", new Uint8Array(reader.result));
+    
   })
   
 
