@@ -22,47 +22,34 @@ window.convertToMd = (input) => {
   reader.readAsArrayBuffer(file);
 }
 
-window.convertToDocx = (input) => {
+window.convertToDocx = async (input) => {
 
   const file = input.files[0];
   const jszip = new window.JSZip();
+  const decoder = new TextDecoder();
   var jsonString = "";
   var mdString = [];
   const images = [];
 
 
-  jszip.loadAsync(file).then(async function (zip) {
-    zip.forEach(function (relativePath, zipEntry) {
-      if (zipEntry.name === 'images/') {
-        zip.folder("images/").forEach(function (relativePath, zipFile) {
-          if (!file.dir) {
-            console.log(zipFile);
-
-            // The file's text will be printed here
-            let imageHex = convertToHex(zipFile._data.compressedContent);
-            images.push(new Image(zipFile.name, imageHex));
-          }
-        })
-
-      }
-      if (zipEntry.name === 'articles/') {
-        zip.folder("articles/").forEach(function (relativePath, file) {
-          if (!file.dir) {
-            console.log("arrived");
-            console.log(file.name);
-            mdString.push(String.fromCharCode.apply(null, file._data.compressedContent));
-            //md2html(file);
-          }
-        });
-      }
+  jszip.loadAsync(file).then(function (zip) {
+    zip.folder("articles/").forEach(async function (relativePath, file) {
+      mdString.push(await file.async("text"));
+      console.log(await file.async("text"));
     });
-    jsonString = createJsonImages(images);
-
-    var stringArray = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
-
-    
+    zip.folder("images/").forEach(async function (relativePath, file) {
+      let imageHex = convertToHex(await file.async("text"));
+      images.push(new Image(file.name, imageHex));
+      console.log(await file.async("blob"));
+    });
   })
-  
+
+  jsonString = createJsonImages(images);
+  console.log(jsonString);
+
+  var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
+
+  downloadBlob(string, 'test.zip', 'application/octet-stream');
 
 };
 
@@ -103,11 +90,9 @@ function createJsonImages(images) {
 
 function convertToHex(image) {
   let hex = '';
-  const hexArray = image;
-  hexArray.forEach(function (byte) {
-    hex += byte.toString(16).padStart(2, '0');
-  });
-  console.log(hex);
+  for (let i = 0; i < image.length; i++) {
+    hex += image.charCodeAt(i).toString(16);
+  }
   return hex;
 }
 

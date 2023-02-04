@@ -90,10 +90,16 @@
         //The .zip file stored in the zipStream
         using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
         {
+
+            ZipArchiveEntry rootFolder = zipArchive.CreateEntry("DGConvertor/");
+            rootFolder.ExternalAttributes = (int)FileAttributes.Directory << 16;
+
+            ZipArchiveEntry subFolder = zipArchive.CreateEntry("DGConvertor/Articles/");
+            subFolder.ExternalAttributes = (int)FileAttributes.Directory << 16;
             for (int i = 0; i < outStreamArray.Length; i++)
             {
                 //The entry already created in the .zip
-                ZipArchiveEntry entry = zipArchive.CreateEntry($"document_{i}.txt");
+                ZipArchiveEntry entry = zipArchive.CreateEntry($"Articles/document_{i}.txt");
                 using (Stream entryStream = entry.Open())
                 {
                     outStreamArray[i].CopyTo(entryStream);
