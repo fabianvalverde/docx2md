@@ -40,17 +40,15 @@ window.convertToDocx = async (input) => {
     zip.folder("images/").forEach(async function (relativePath, file) {
       let imageHex = convertToHex(await file.async("text"));
       images.push(new Image(file.name, imageHex));
-      console.log(await file.async("blob"));
     });
+  }).then(async function(){
+    jsonString = createJsonImages(images);
+    console.log(jsonString);
+  
+    var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
+  
+    downloadBlob(string, 'test.zip', 'application/octet-stream');
   })
-
-  jsonString = createJsonImages(images);
-  console.log(jsonString);
-
-  var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
-
-  downloadBlob(string, 'test.zip', 'application/octet-stream');
-
 };
 
 
