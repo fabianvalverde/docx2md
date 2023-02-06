@@ -30,47 +30,78 @@ window.convertToDocx = async (input) => {
   var jsonString = "";
   var mdString = [];
   const images = [];
-  const imagesPromises = [];
-  const articlesPromises = [];
+  const promises = [];
 
 
   jszip.loadAsync(file).then(async function (zip) {
 
-    zip.folder("articles/").forEach(async function (relativePath, file) {
-      articlesPromises.push(file.async("text"));
-    });
-    zip.folder("images/").forEach(async function (relativePath, file) {
-      imagesPromises.push(file);
-    });
+    //Other way to fill promises
+    // zip.folder("articles/").forEach(async function (relativePath, file) {
+    //   promises.push(file);
+    // });
+    // zip.folder("images/").forEach(async function (relativePath, file) {
+    //   promises.push(file);
+    // });
 
-    Promise.all(imagesPromises).then(function (data) {
-      data.forEach(async file => {
-        let imageHex = convertToHex(await file.async("text"));
-        images.push(new Image(file.name, imageHex));
-        console.log(images);
-      });
+    promises.push(...zip.folder("articles").file(/./));
+    promises.push(...zip.folder("images").file(/./));
 
+    await new Promise(async (resolve, reject) => {
+        promises.forEach(async (file, index) => {
+          if (file.name.startsWith('images/')) {
+            let imageHex = convertToHex(await file.async("text"));
+            images.push(new Image(file.name, imageHex));
+          }
+          else if (file.name.startsWith('articles/')) {
+            mdString.push(await file.async("text"));
+            console.log(await file.async("text"));
+          }
+          if(index == promises.length-1){
+            resolve();
+          }
+        });
+      console.log('Task 1 complete!');
     });
+    jsonString = createJsonImages(images);
 
-    Promise.all(articlesPromises).then(function (data) {
-      data.forEach(file => {
-        mdString.push(file);
-        console.log(file);
-      });
-    });
+    console.log(jsonString);
+
+    var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
+
+    downloadBlob(zipBytes, 'test.zip', 'application/octet-stream');
+
+
+    // Promise.all(promises).then(function (data) {
+    //   data.forEach(async file => {
+    //     if(file.name.startsWith('images/')){
+    //       let imageHex = convertToHex(await file.async("text"));
+    //       images.push(new Image(file.name, imageHex));
+    //     }
+    //     else if(file.name.startsWith('articles/')){
+    //       mdString.push(await file.async("text"));
+    //       console.log(await file.async("text"));
+    //     }
+    //   });
+    // }).then(async function (){
+    //   jsonString = createJsonImages(images);
+
+    //   // var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
+
+    //   // downloadBlob(string, 'test.zip', 'application/octet-stream');
+    // });
   })
-    // jsonString = createJsonImages(images);
-    // console.log(jsonString);
-  
-    // var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
-  
-    // downloadBlob(string, 'test.zip', 'application/octet-stream');
-};
+  //jsonString = createJsonImages(images);
 
+  // var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
+
+  // downloadBlob(string, 'test.zip', 'application/octet-stream');
+};
 
 //-------------------------------------------------
 // Function below is to create a JSON with images info
 //-------------------------------------------------
+
+
 function createJsonImages(images) {
 
   var json = {}
