@@ -30,28 +30,47 @@ window.convertToDocx = async (input) => {
   var jsonString = "";
   var mdString = [];
   const images = [];
+  const imagesPromises = [];
+  const articlesPromises = [];
 
 
-  jszip.loadAsync(file).then(function (zip) {
+  jszip.loadAsync(file).then(async function (zip) {
+
     zip.folder("articles/").forEach(async function (relativePath, file) {
-      mdString.push(await file.async("text"));
-      console.log(await file.async("text"));
+      articlesPromises.push(file.async("text"));
     });
     zip.folder("images/").forEach(async function (relativePath, file) {
-      let imageHex = convertToHex(await file.async("text"));
-      images.push(new Image(file.name, imageHex));
+      imagesPromises.push(file);
     });
-  }).then(async function(){
-    jsonString = createJsonImages(images);
-    console.log(jsonString);
-  
-    var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
-  
-    downloadBlob(string, 'test.zip', 'application/octet-stream');
+
+    Promise.all(imagesPromises).then(function (data) {
+      data.forEach(async file => {
+        let imageHex = convertToHex(await file.async("text"));
+        images.push(new Image(file.name, imageHex));
+        console.log(images);
+      });
+
+    });
+
+    Promise.all(articlesPromises).then(function (data) {
+      data.forEach(file => {
+        mdString.push(file);
+        console.log(file);
+      });
+    });
   })
+    // jsonString = createJsonImages(images);
+    // console.log(jsonString);
+  
+    // var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
+  
+    // downloadBlob(string, 'test.zip', 'application/octet-stream');
 };
 
 
+//-------------------------------------------------
+// Function below is to create a JSON with images info
+//-------------------------------------------------
 function createJsonImages(images) {
 
   var json = {}
@@ -64,6 +83,18 @@ function createJsonImages(images) {
 
   return jsonString;
 
+}
+
+//-------------------------------------------------
+// Function below is to convert and image to hex format
+//-------------------------------------------------
+
+function convertToHex(image) {
+  let hex = '';
+  for (let i = 0; i < image.length; i++) {
+    hex += image.charCodeAt(i).toString(16);
+  }
+  return hex;
 }
 
 //-------------------------------------------------
@@ -80,19 +111,6 @@ function createJsonImages(images) {
 //       .process(md ?? "error")
 //   return String(file)
 // }
-
-
-//-------------------------------------------------
-// Function below is to convert and image to hex format
-//-------------------------------------------------
-
-function convertToHex(image) {
-  let hex = '';
-  for (let i = 0; i < image.length; i++) {
-    hex += image.charCodeAt(i).toString(16);
-  }
-  return hex;
-}
 
 
 //-------------------------------------------------
