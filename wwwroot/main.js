@@ -30,7 +30,7 @@ window.convertToDocx = async (input) => {
   var jsonString = "";
   var mdString = [];
   const images = [];
-  const promises = [];
+  const zipFiles = [];
 
 
   jszip.loadAsync(file).then(async function (zip) {
@@ -43,24 +43,22 @@ window.convertToDocx = async (input) => {
     //   promises.push(file);
     // });
 
-    promises.push(...zip.folder("articles").file(/./));
-    promises.push(...zip.folder("images").file(/./));
+    zipFiles.push(...zip.folder("articles").file(/./));
+    zipFiles.push(...zip.folder("images").file(/./));
 
     await new Promise(async (resolve, reject) => {
-        promises.forEach(async (file, index) => {
+        zipFiles.forEach(async (file, index) => {
           if (file.name.startsWith('images/')) {
             let imageHex = convertToHex(await file.async("text"));
             images.push(new Image(file.name, imageHex));
           }
           else if (file.name.startsWith('articles/')) {
             mdString.push(await file.async("text"));
-            console.log(await file.async("text"));
           }
-          if(index == promises.length-1){
+          if(index == zipFiles.length-1){
             resolve();
           }
         });
-      console.log('Task 1 complete!');
     });
     jsonString = createJsonImages(images);
 
