@@ -27,7 +27,6 @@ window.convertToDocx = async (input) => {
   const file = input.files[0];
   const jszip = new window.JSZip();
   const decoder = new TextDecoder();
-  var jsonString = "";
   var mdString = [];
   const images = [];
   const zipFiles = [];
@@ -60,11 +59,11 @@ window.convertToDocx = async (input) => {
           }
         });
     });
-    jsonString = createJsonImages(images);
+    const jsonString = createJsonImages(images);
 
     console.log(jsonString);
 
-    var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
+    var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openMdFile", mdString, jsonString);
 
     downloadBlob(zipBytes, 'test.zip', 'application/octet-stream');
 
@@ -111,7 +110,6 @@ function createJsonImages(images) {
   var jsonString = JSON.stringify(json);
 
   return jsonString;
-
 }
 
 //-------------------------------------------------

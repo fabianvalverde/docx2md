@@ -77,12 +77,12 @@
 
 
     [JSInvokable]
-    public static byte[] openMdFile(String[] mdFiles, String images)
+    public static byte[] openMdFile(string[] mdFiles, string images)
     {
         return convertToDocx(mdFiles, images).Result;//Returns a stream
     }
 
-    public static async Task<byte[]> convertToDocx(String[] mdFiles, String images)
+    public static async Task<byte[]> convertToDocx(string[] mdFiles, string images)
     {
         MemoryStream[] outStreamArray = new MemoryStream[mdFiles.Length];
         MemoryStream zipStream = new MemoryStream();
