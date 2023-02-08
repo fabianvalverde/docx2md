@@ -1,5 +1,4 @@
 import * as JSZip from './jszip.min.js';
-import Image from "./images.js";
 // import {unified} from './node_modules/unified/index.js';
 // import remarkParse from './node_modules/remark-parse/index.js';
 // import remarkRehype from './node_modules/remark-rehype/index.js';
@@ -49,7 +48,8 @@ window.convertToDocx = async (input) => {
         zipFiles.forEach(async (file, index) => {
           if (file.name.startsWith('images/')) {
             let imageHex = convertToHex(await file.async("text"));
-            images.push(new Image(file.name, imageHex));
+            images.push({ src: file.name, hex: imageHex });
+            
           }
           else if (file.name.startsWith('articles/')) {
             mdString.push(await file.async("text"));
@@ -59,7 +59,7 @@ window.convertToDocx = async (input) => {
           }
         });
     });
-    const jsonString = createJsonImages(images);
+    const jsonString = JSON.stringify(images);
 
     console.log(jsonString);
 
@@ -95,31 +95,15 @@ window.convertToDocx = async (input) => {
 };
 
 //-------------------------------------------------
-// Function below is to create a JSON with images info
-//-------------------------------------------------
-
-
-function createJsonImages(images) {
-
-  var json = {}
-
-  images.forEach(function (img) {
-    json[img.src] = img.hex;
-  });
-
-  var jsonString = JSON.stringify(json);
-
-  return jsonString;
-}
-
-//-------------------------------------------------
 // Function below is to convert and image to hex format
 //-------------------------------------------------
 
 function convertToHex(image) {
   let hex = '';
+  let finalHex = '';
   for (let i = 0; i < image.length; i++) {
     hex += image.charCodeAt(i).toString(16);
+    //finalHex += ("00"+hex).slice(-4);
   }
   return hex;
 }
