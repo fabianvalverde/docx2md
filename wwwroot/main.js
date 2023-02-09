@@ -102,7 +102,7 @@ function convertToHex(image) {
   let hex = '';
   let finalHex = '';
   for (let i = 0; i < image.length; i++) {
-    hex += image.charCodeAt(i).toString(16);
+    hex += ("00" + image.charCodeAt(i).toString(16)).slice(-4);
     //finalHex += ("00"+hex).slice(-4);
   }
   return hex;
