@@ -55,60 +55,80 @@
     }
 
     //Works for a normal call
-@* 
-    [JSInvokable]
-    public static byte[] openMdFile(byte[] file)
-    {
-        return convertToDocx(file).Result;//Returns a stream
-    }
+    @*
+[JSInvokable]
+public static byte[] openMdFile(byte[] file)
+{
+return convertToDocx(file).Result;//Returns a stream
+}
 
-    public static async Task<byte[]> convertToDocx(byte[] data)
-    {
-        string stringData = Encoding.UTF8.GetString(data);
+public static async Task<byte[]> convertToDocx(byte[] data)
+{
+string stringData = Encoding.UTF8.GetString(data);
 
-        var outStream = new MemoryStream();
+var outStream = new MemoryStream();
 
-        await DgDocx.md_to_docx(stringData, outStream);
+await DgDocx.md_to_docx(stringData, outStream);
 
-        byte[] outData = outStream.ToArray();
+byte[] outData = outStream.ToArray();
 
-        return outData;
-    } *@
+return outData;
+} *@
 
 
     [JSInvokable]
     public static byte[] openMdFile(string[] mdFiles, string images)
     {
-        return convertToDocx(mdFiles, images).Result;//Returns a stream
+        var x = convertToDocx(mdFiles, images).Result;
+        return x;//Returns a stream
     }
 
     public static async Task<byte[]> convertToDocx(string[] mdFiles, string images)
     {
-        MemoryStream[] outStreamArray = new MemoryStream[mdFiles.Length];
-        MemoryStream zipStream = new MemoryStream();
-
-        await DgDocx.md_to_docx(mdFiles, images, outStreamArray);
-
-        //The .zip file stored in the zipStream
-        using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+        try
         {
+            MemoryStream[] outStreamArray = new MemoryStream[mdFiles.Length];
+            MemoryStream zipStream = new MemoryStream();
 
-            ZipArchiveEntry rootFolder = zipArchive.CreateEntry("DGConvertor/");
-            rootFolder.ExternalAttributes = (int)FileAttributes.Directory << 16;
+            await DgDocx.md_to_docx(mdFiles, images, outStreamArray);
 
-            ZipArchiveEntry subFolder = zipArchive.CreateEntry("DGConvertor/Articles/");
-            subFolder.ExternalAttributes = (int)FileAttributes.Directory << 16;
-            for (int i = 0; i < outStreamArray.Length; i++)
+            //The .zip file stored in the zipStream
+            using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
             {
-                //The entry already created in the .zip
-                ZipArchiveEntry entry = zipArchive.CreateEntry($"Articles/document_{i}.txt");
-                using (Stream entryStream = entry.Open())
+
+                ZipArchiveEntry rootFolder = zipArchive.CreateEntry("DGConvertor/");
+                rootFolder.ExternalAttributes = (int)FileAttributes.Directory << 16;
+
+                ZipArchiveEntry subFolder = zipArchive.CreateEntry("DGConvertor/Articles/");
+                subFolder.ExternalAttributes = (int)FileAttributes.Directory << 16;
+                for (int i = 0; i < outStreamArray.Length; i++)
                 {
-                    outStreamArray[i].CopyTo(entryStream);
+                    //The entry already created in the .zip
+                    ZipArchiveEntry entry = zipArchive.CreateEntry($"Articles/document_{i}.docx");
+                    using (Stream entryStream = entry.Open())
+                    {
+                        try{
+                            byte[] bytes = Encoding. ASCII. GetBytes(mdFiles[i]);
+                            //await outStreamArray[i].CopyToAsync(entryStream);
+                            entryStream.Write(bytes);
+                            entryStream.Close();
+                        }catch(Exception e){
+                            Console.WriteLine(e);
+                        }
+                        
+                    }
                 }
+                var y = 3;
             }
+                
+            return zipStream.ToArray();
         }
-        return zipStream.ToArray();
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new byte[] { };
+        }
+
     }
 }
 
