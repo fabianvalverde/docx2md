@@ -24,6 +24,8 @@ window.convertToMd = (input) => {
 window.convertToDocx = async (input) => {
 
   const file = input.files[0];
+
+if(file.type == "application/zip"){
   const jszip = new window.JSZip();
   const decoder = new TextDecoder();
   var mdString = [];
@@ -41,8 +43,8 @@ window.convertToDocx = async (input) => {
     //   promises.push(file);
     // });
 
-    zipFiles.push(...zip.folder("articles").file(/./));
-    zipFiles.push(...zip.folder("images").file(/./));
+    zipFiles.push(...zip.folder("articles").file(/^[^\.]/));
+    zipFiles.push(...zip.folder("images").file(/^[^\.]/));
 
     await new Promise(async (resolve, reject) => {
         zipFiles.forEach(async (file, index) => {
@@ -63,7 +65,7 @@ window.convertToDocx = async (input) => {
 
     console.log(jsonString);
 
-    var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openMdFile", mdString, jsonString);
+    var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openMdZipFile", mdString, jsonString);
 
     downloadBlob(zipBytes, 'test.zip', 'application/octet-stream');
 
@@ -87,6 +89,17 @@ window.convertToDocx = async (input) => {
     //   // downloadBlob(string, 'test.zip', 'application/octet-stream');
     // });
   })
+}else{
+  var reader = new FileReader();
+  reader.onload = async function (e) {
+
+    var byte = await DotNet.invokeMethodAsync("blazorwasm", "openMdFile", new Uint8Array(reader.result));;
+
+    downloadBlob(byte, "test.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+  }
+  reader.readAsArrayBuffer(file)
+}
+
   //jsonString = createJsonImages(images);
 
   // var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
