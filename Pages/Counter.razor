@@ -103,10 +103,11 @@
                     {
                         try
                         {
+                            outStreamArray[i].Position = 0;
                             //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
                             await outStreamArray[i].CopyToAsync(entryStream);
                             //entryStream.Write(bytes);
-                            //entryStream.Close();
+                            entryStream.Close();
                         }
                         catch (Exception e)
                         {
