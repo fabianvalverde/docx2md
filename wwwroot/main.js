@@ -49,7 +49,15 @@ if(file.type == "application/zip"){
     await new Promise(async (resolve, reject) => {
         zipFiles.forEach(async (file, index) => {
           if (file.name.startsWith('images/')) {
-            let imageHex = convertToHex(await file.async("text"));
+            //let imageHex = convertToHex(await file.async("text"));
+            //let imageHex = bytesToHexString(await file.async('uint8array'));
+            let imageHex = Array.from(await file.async('uint8array'))
+             .map(b => b.toString(16).padStart(2, '0'))
+             .join('');
+             if (imageHex.length % 2 !== 0) {
+              // Add a padding of 0 to the end of hexString
+              imageHex += '0';
+            }
             images.push({ src: file.name, hex: imageHex });
             
           }
@@ -62,8 +70,6 @@ if(file.type == "application/zip"){
         });
     });
     const jsonString = JSON.stringify(images);
-
-    console.log(jsonString);
 
     var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openMdZipFile", mdString, jsonString);
 
@@ -108,7 +114,7 @@ if(file.type == "application/zip"){
 };
 
 //-------------------------------------------------
-// Function below is to convert and image to hex format
+// Function below is to convert an image to hex format
 //-------------------------------------------------
 
 function convertToHex(image) {
@@ -120,6 +126,24 @@ function convertToHex(image) {
   }
   return hex;
 }
+
+
+//-------------------------------------------------
+// Functions below is to convert a byte to hex format
+//-------------------------------------------------
+
+function byteToHex(byte) {
+return byte.toString(16).padStart(2, '0');
+}
+
+function bytesToHex(bytes) {
+  return bytes.map(byteToHex);
+}
+
+function bytesToHexString(bytes) {
+  return bytesToHex(bytes).join('');
+}
+
 
 //-------------------------------------------------
 // Function below is to convert .md file to html
