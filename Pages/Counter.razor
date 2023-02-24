@@ -34,53 +34,93 @@
     private IJSObjectReference? module;
 
     [JSInvokable]
-    public static string openDocxFile(byte[] file)
+    public static byte[] openDocxZipFile(byte[] file)
     {
-        return docxToMd(file).Result;
+        return docxToZipMd(file).Result;
     }
 
-    public static async Task<string> docxToMd(byte[] file)
+    public static async Task<byte[]> docxToZipMd(byte[] file)
     {
-        string md;
-        var outStream = new MemoryStream();
+        MemoryStream outStream = new MemoryStream();
+        
+        Dictionary<string, Stream> images = new Dictionary<string, Stream>();
 
         using (MemoryStream data = new MemoryStream(file))
         {
-            await DgDocx.docx_to_md(data, outStream);
-            StreamReader reader = new StreamReader(outStream);
-            outStream.Seek(0, SeekOrigin.Begin);
-            md = reader.ReadToEnd();
+            await DgDocx.docx_to_md(data, outStream, images);
+            @* StreamReader reader = new StreamReader(outStream);
+            md = reader.ReadToEnd(); *@
         }
-        return md;
+
+        MemoryStream zipStream = new MemoryStream();
+        using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+        {
+            //The entry already created in the .zip
+            ZipArchiveEntry documentEntry = zipArchive.CreateEntry($"DGConvertor/Articles/document.md");
+            using (Stream entryStreamMd = documentEntry.Open())
+            {
+                try
+                {
+                    outStream.Position = 0;
+                    //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
+                    await outStream.CopyToAsync(entryStreamMd);
+                    //entryStream.Write(bytes);
+                    entryStreamMd.Close();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+            foreach (KeyValuePair<string, Stream> img in images)
+            {
+                ZipArchiveEntry imagesEntry = zipArchive.CreateEntry($"DGConvertor/images/{img.Key}");
+                using (Stream entryStreamImg = imagesEntry.Open())
+                {
+                    try
+                    {
+                        //img.Value.Position = 0;
+                        //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
+                        await img.Value.CopyToAsync(entryStreamImg);
+                        //entryStream.Write(bytes);
+                         entryStreamImg.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+            }
+        }
+        return zipStream.ToArray();
     }
 
     //Works for a normal call
 
-    [JSInvokable]
-    public static byte[] openMdFile(byte[] file)
-    {
-        return convertToDocx(file).Result;//Returns a stream
-    }
+    @* [JSInvokable]
+public static byte[] openMdFile(byte[] file)
+{
+return convertToDocx(file).Result;//Returns a stream
+}
 
-    public static async Task<byte[]> convertToDocx(byte[] data)
-    {
-        string stringData = Encoding.UTF8.GetString(data);
+public static async Task<byte[]> convertToDocx(byte[] data)
+{
+string stringData = Encoding.UTF8.GetString(data);
 
-        var outStream = new MemoryStream();
+var outStream = new MemoryStream();
 
-        await DgDocx.md_to_docx(stringData, outStream);
+await DgDocx.md_to_docx(stringData, outStream);
 
-        byte[] outData = outStream.ToArray();
+byte[] outData = outStream.ToArray();
 
-        return outData;
-    }
+return outData;
+} *@
 
 
     [JSInvokable]
     public static byte[] openMdZipFile(string[] mdFiles, string images)
     {
-        var x = convertToZipDocx(mdFiles, images).Result;
-        return x;//Returns a stream
+        return convertToZipDocx(mdFiles, images).Result;
     }
 
     public static async Task<byte[]> convertToZipDocx(string[] mdFiles, string images)
@@ -88,10 +128,11 @@
         try
         {
             MemoryStream[] outStreamArray = new MemoryStream[mdFiles.Length];
-            MemoryStream zipStream = new MemoryStream();
+            
 
             await DgDocx.md_to_docx(mdFiles, images, outStreamArray);
 
+            MemoryStream zipStream = new MemoryStream();
             //The .zip file stored in the zipStream
             using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
             {
@@ -113,12 +154,9 @@
                         {
                             Console.WriteLine(e);
                         }
-
                     }
                 }
-                var y = 3;
             }
-
             return zipStream.ToArray();
         }
         catch (Exception e)

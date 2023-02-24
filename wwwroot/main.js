@@ -14,9 +14,13 @@ window.convertToMd = (input) => {
   var reader = new FileReader();
   reader.onload = async function (e) {
     // The file's text will be printed here
-    var string = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", new Uint8Array(reader.result));
+    // var string = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", new Uint8Array(reader.result));
 
-    downloadBlob(string, 'test.md', 'application/octet-stream');
+    // downloadBlob(string, 'test.md', 'application/octet-stream');
+
+    var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxZipFile", new Uint8Array(reader.result));
+
+    downloadBlob(zipBytes, 'testMd.zip', 'application/octet-stream');
   };
   reader.readAsArrayBuffer(file);
 }
