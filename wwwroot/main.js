@@ -50,55 +50,65 @@ window.convertToDocx = async (input) => {
       zipFiles.push(...zip.folder("articles").file(/^[^\.]/));
       zipFiles.push(...zip.folder("images").file(/^[^\.]/));
 
-      await new Promise(async (resolve, reject) => {
-        zipFiles.forEach(async (file, index) => {
-          if (file.name.startsWith('images/')) {
-            //let imageHex = convertToHex(await file.async("text"));
-            //let imageHex = bytesToHexString(await file.async('uint8array'));
-            let imageHex = Array.from(await file.async('uint8array'))
-              .map(b => b.toString(16).padStart(2, '0'))
-              .join('');
+      const DGCoverterPromises = [];
+      const fileNames = [];
+
+      zipFiles.forEach(async function(file, index){
+        if (file.name.startsWith('images/')) {
+          DGCoverterPromises.push(file.async('uint8array'))
+          fileNames.push(file.name)
+        }
+        else if (file.name.startsWith('articles/')) {
+          DGCoverterPromises.push(file.async("text"))
+          fileNames.push(file.name)
+        }
+      })
+
+      await Promise.all(DGCoverterPromises).then(function (data) {
+        data.forEach(function(file, index){
+          if(typeof file === 'string'){
+            mdString.push(file);
+          }else{
+            let imageHex = Array.from(file)
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('');
             if (imageHex.length % 2 !== 0) {
               // Add a padding of 0 to the end of hexString
               imageHex += '0';
             }
-            console.log(imageHex);
-            images.push({ src: file.name, hex: imageHex });
-
+            images.push({ src: fileNames[index], hex: imageHex });
           }
-          else if (file.name.startsWith('articles/')) {
-            mdString.push(await file.async("text"));
-          }
-          if (index == zipFiles.length - 1) {
-            resolve();
-          }
-        });
+        })
       });
+
+      // await new Promise(async (resolve, reject) => {
+      //   zipFiles.forEach(async (file, index) => {
+      //     if (file.name.startsWith('images/')) {
+      //       //let imageHex = convertToHex(await file.async("text"));
+      //       //let imageHex = bytesToHexString(await file.async('uint8array'));
+      //       let imageHex = Array.from(await file.async('uint8array'))
+      //         .map(b => b.toString(16).padStart(2, '0'))
+      //         .join('');
+      //       if (imageHex.length % 2 !== 0) {
+      //         // Add a padding of 0 to the end of hexString
+      //         imageHex += '0';
+      //       }
+      //       images.push({ src: file.name, hex: imageHex });
+      //       console.log(file.name);
+      //     }
+      //     else if (file.name.startsWith('articles/')) {
+      //       mdString.push(await file.async("text"));
+      //     }
+      //     if (index == zipFiles.length - 1) {
+      //       resolve();
+      //     }
+      //   });
+      // });
       const jsonString = JSON.stringify(images);
 
       var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openMdZipFile", mdString, jsonString);
 
       downloadBlob(zipBytes, 'test.zip', 'application/octet-stream');
-
-
-      // Promise.all(promises).then(function (data) {
-      //   data.forEach(async file => {
-      //     if(file.name.startsWith('images/')){
-      //       let imageHex = convertToHex(await file.async("text"));
-      //       images.push(new Image(file.name, imageHex));
-      //     }
-      //     else if(file.name.startsWith('articles/')){
-      //       mdString.push(await file.async("text"));
-      //       console.log(await file.async("text"));
-      //     }
-      //   });
-      // }).then(async function (){
-      //   jsonString = createJsonImages(images);
-
-      //   // var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
-
-      //   // downloadBlob(string, 'test.zip', 'application/octet-stream');
-      // });
     })
   } else {
     var reader = new FileReader();

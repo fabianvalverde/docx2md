@@ -57,15 +57,15 @@
         {
             //The entry already created in the .zip
             ZipArchiveEntry documentEntry = zipArchive.CreateEntry($"DGConvertor/Articles/document.md");
-            using (Stream entryStreamMd = documentEntry.Open())
+            using (Stream entryStream = documentEntry.Open())
             {
                 try
                 {
                     outStream.Position = 0;
                     //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
-                    await outStream.CopyToAsync(entryStreamMd);
+                    await outStream.CopyToAsync(entryStream);
                     //entryStream.Write(bytes);
-                    entryStreamMd.Close();
+                    entryStream.Close();
                 }
                 catch (Exception e)
                 {
@@ -75,15 +75,15 @@
             foreach (KeyValuePair<string, Stream> img in images)
             {
                 ZipArchiveEntry imagesEntry = zipArchive.CreateEntry($"DGConvertor/images/{img.Key}");
-                using (Stream entryStreamImg = imagesEntry.Open())
+                using (Stream entryStream = imagesEntry.Open())
                 {
                     try
                     {
                         //img.Value.Position = 0;
                         //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
-                        await img.Value.CopyToAsync(entryStreamImg);
+                        await img.Value.CopyToAsync(entryStream);
                         //entryStream.Write(bytes);
-                         entryStreamImg.Close();
+                         entryStream.Close();
                     }
                     catch (Exception e)
                     {
