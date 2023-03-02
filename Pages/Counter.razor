@@ -79,10 +79,8 @@
                 {
                     try
                     {
-                        //img.Value.Position = 0;
-                        //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
+                        img.Value.Position = 0;
                         await img.Value.CopyToAsync(entryStream);
-                        //entryStream.Write(bytes);
                          entryStream.Close();
                     }
                     catch (Exception e)
