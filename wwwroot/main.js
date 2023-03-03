@@ -33,6 +33,7 @@ window.convertToDocx = async (input) => {
     const jszip = new window.JSZip();
     const decoder = new TextDecoder();
     var mdString = [];
+    var test = [];
     const images = [];
     const zipFiles = [];
 
@@ -67,7 +68,8 @@ window.convertToDocx = async (input) => {
       await Promise.all(DGCoverterPromises).then(function (data) {
         data.forEach(function(file, index){
           if(typeof file === 'string'){
-            mdString.push(file);
+            mdString.push({src: fileNames[index], file: file});
+            //test.push({src: fileNames[index], file: file});
           }else{
             let imageHex = Array.from(file)
             .map(b => b.toString(16).padStart(2, '0'))

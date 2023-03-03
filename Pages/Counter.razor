@@ -1,7 +1,7 @@
 ﻿@using docx_lib;
 @using System.IO;
 @using System.IO.Compression;
-@using System.Text;
+@using System.Text.Json;
 @inject IJSRuntime JS;
 
 @page "/counter"
@@ -116,35 +116,40 @@ return outData;
 
 
     [JSInvokable]
-    public static byte[] openMdZipFile(string[] mdFiles, string images)
+    public static byte[] openMdZipFile(object[] mdObject, string images)
     {
-        return convertToZipDocx(mdFiles, images).Result;
+        //var jarray = (JsonElement)test;
+        //Console.WriteLine(jarray[0].GetProperty("src").GetString());
+        return convertToZipDocx(mdObject, images).Result;
     }
 
-    public static async Task<byte[]> convertToZipDocx(string[] mdFiles, string images)
+    public static async Task<byte[]> convertToZipDocx(object[] mdObject, string images)
     {
+        string json = JsonSerializer.Serialize(mdObject);
+        JsonElement[] mdFiles = JsonSerializer.Deserialize<JsonElement[]>(json);
+
         try
         {
-            MemoryStream[] outStreamArray = new MemoryStream[mdFiles.Length];
+            Dictionary<string, MemoryStream> dictionary = new Dictionary<string, MemoryStream>();
             
 
-            await DgDocx.md_to_docx(mdFiles, images, outStreamArray);
+            await DgDocx.md_to_docx(mdFiles, images, dictionary);
 
             MemoryStream zipStream = new MemoryStream();
             //The .zip file stored in the zipStream
             using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
             {
-                for (int i = 0; i < outStreamArray.Length; i++)
+                for (int i = 0; i < dictionary.Count; i++)
                 {
                     //The entry already created in the .zip
-                    ZipArchiveEntry entry = zipArchive.CreateEntry($"DGConvertor/Articles/document_{i}.docx");
+                    ZipArchiveEntry entry = zipArchive.CreateEntry($"DGConvertor/Articles/{dictionary.ElementAt(i).Key.Replace("articles/", "").Replace(".md", "")}.docx");
                     using (Stream entryStream = entry.Open())
                     {
                         try
                         {
-                            outStreamArray[i].Position = 0;
+                            dictionary.ElementAt(i).Value.Position = 0;
                             //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
-                            await outStreamArray[i].CopyToAsync(entryStream);
+                            await dictionary.ElementAt(i).Value.CopyToAsync(entryStream);
                             //entryStream.Write(bytes);
                             entryStream.Close();
                         }
