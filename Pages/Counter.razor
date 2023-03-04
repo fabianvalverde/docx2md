@@ -34,12 +34,12 @@
     private IJSObjectReference? module;
 
     [JSInvokable]
-    public static byte[] openDocxZipFile(byte[] file)
+    public static byte[] openDocxZipFile(byte[] file, string name)
     {
-        return docxToZipMd(file).Result;
+        return docxToZipMd(file, name).Result;
     }
 
-    public static async Task<byte[]> docxToZipMd(byte[] file)
+    public static async Task<byte[]> docxToZipMd(byte[] file, string name)
     {
         MemoryStream outStream = new MemoryStream();
         
@@ -56,7 +56,7 @@
         using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
         {
             //The entry already created in the .zip
-            ZipArchiveEntry documentEntry = zipArchive.CreateEntry($"DGConvertor/Articles/document.md");
+            ZipArchiveEntry documentEntry = zipArchive.CreateEntry($"DGConvertor/Articles/{name.Replace(".docx", "")}.md");
             using (Stream entryStream = documentEntry.Open())
             {
                 try
