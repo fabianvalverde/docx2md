@@ -1,22 +1,15 @@
 import * as JSZip from './jszip.min.js';
-// import {unified} from './node_modules/unified/index.js';
-// import remarkParse from './node_modules/remark-parse/index.js';
-// import remarkRehype from './node_modules/remark-rehype/index.js';
-// import rehypeStringify from './node_modules/rehype-stringify/index.js';
-// import rehypeSanitize from './node_modules/rehype-sanitize/index.js';
-// import rehypeSlug from './node_modules/rehype-slug/index.js';
 
 
+//-------------------------------------------------
+// Function below is to convert docx to md
+//-------------------------------------------------
 window.convertToMd = (input) => {
 
   const file = input.files[0];
 
   var reader = new FileReader();
   reader.onload = async function (e) {
-    // The file's text will be printed here
-    // var string = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", new Uint8Array(reader.result));
-
-    // downloadBlob(string, 'test.md', 'application/octet-stream');
 
     var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxZipFile", new Uint8Array(reader.result));
 
@@ -25,6 +18,9 @@ window.convertToMd = (input) => {
   reader.readAsArrayBuffer(file);
 }
 
+//-------------------------------------------------
+// Function below is to convert md to docx
+//-------------------------------------------------
 window.convertToDocx = async (input) => {
 
   const file = input.files[0];
@@ -39,14 +35,6 @@ window.convertToDocx = async (input) => {
 
 
     jszip.loadAsync(file).then(async function (zip) {
-
-      //Other way to fill promises
-      // zip.folder("articles/").forEach(async function (relativePath, file) {
-      //   promises.push(file);
-      // });
-      // zip.folder("images/").forEach(async function (relativePath, file) {
-      //   promises.push(file);
-      // });
 
       zipFiles.push(...zip.folder("articles").file(/^[^\.]/));
       zipFiles.push(...zip.folder("images").file(/^[^\.]/));
@@ -69,7 +57,6 @@ window.convertToDocx = async (input) => {
         data.forEach(function(file, index){
           if(typeof file === 'string'){
             mdString.push({src: fileNames[index], file: file});
-            //test.push({src: fileNames[index], file: file});
           }else{
             let imageHex = Array.from(file)
             .map(b => b.toString(16).padStart(2, '0'))
@@ -83,29 +70,6 @@ window.convertToDocx = async (input) => {
         })
       });
 
-      // await new Promise(async (resolve, reject) => {
-      //   zipFiles.forEach(async (file, index) => {
-      //     if (file.name.startsWith('images/')) {
-      //       //let imageHex = convertToHex(await file.async("text"));
-      //       //let imageHex = bytesToHexString(await file.async('uint8array'));
-      //       let imageHex = Array.from(await file.async('uint8array'))
-      //         .map(b => b.toString(16).padStart(2, '0'))
-      //         .join('');
-      //       if (imageHex.length % 2 !== 0) {
-      //         // Add a padding of 0 to the end of hexString
-      //         imageHex += '0';
-      //       }
-      //       images.push({ src: file.name, hex: imageHex });
-      //       console.log(file.name);
-      //     }
-      //     else if (file.name.startsWith('articles/')) {
-      //       mdString.push(await file.async("text"));
-      //     }
-      //     if (index == zipFiles.length - 1) {
-      //       resolve();
-      //     }
-      //   });
-      // });
       const jsonString = JSON.stringify(images);
 
       var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openMdZipFile", mdString, jsonString);
@@ -122,12 +86,6 @@ window.convertToDocx = async (input) => {
     }
     reader.readAsArrayBuffer(file)
   }
-
-  //jsonString = createJsonImages(images);
-
-  // var zipBytes = await DotNet.invokeMethodAsync("blazorwasm", "openDocxFile", mdString, jsonString);
-
-  // downloadBlob(string, 'test.zip', 'application/octet-stream');
 };
 
 
@@ -140,14 +98,13 @@ function convertToHex(image) {
   let finalHex = '';
   for (let i = 0; i < image.length; i++) {
     hex += ("00" + image.charCodeAt(i).toString(16)).slice(-4);
-    //finalHex += ("00"+hex).slice(-4);
   }
   return hex;
 }
 
 
 //-------------------------------------------------
-// Functions below is to convert a byte to hex format
+// Function below is to convert a byte to hex format
 //-------------------------------------------------
 
 function byteToHex(byte) {
@@ -162,25 +119,8 @@ function bytesToHexString(bytes) {
   return bytesToHex(bytes).join('');
 }
 
-
 //-------------------------------------------------
-// Function below is to convert .md file to html
-//-------------------------------------------------
-
-// async function md2html(md){
-//   const file = await unified()
-//       .use(remarkParse)
-//       .use(remarkRehype)
-//       .use(rehypeSanitize)
-//       .use(rehypeStringify)
-//       .use(rehypeSlug)
-//       .process(md ?? "error")
-//   return String(file)
-// }
-
-
-//-------------------------------------------------
-// Functions below are to download the files after the conversion
+// Function below are to download the files after the conversion
 //-------------------------------------------------
 
 function downloadBlob(data, fileName, mimeType) {
@@ -204,39 +144,3 @@ var downloadURL = function (data, fileName) {
   a.click();
   a.remove();
 };
-
-
-//-------------------------------------------------
-// Functions below failed
-//-------------------------------------------------
-
-// async function readImages(htmlFile) {
-//   const parser = new DOMParser();
-//   let response
-
-//   const htmlTags = parser.parseFromString(htmlFile, "text/html");
-
-//   const imgTags = htmlTags.querySelectorAll("img");
-//   for (const jpg of imgTags) {
-//     console.log(jpg.src);
-//     const result = await fetch(jpg.src);
-//   }
-
-//   imgTags.push(htmlTags.querySelector("img").forEach((e) => e.src));
-// }
-
-
-
-//Previous convertToDocx (Doesn't work because of CORS)
-// function convertToDocx(input) {
-//   const file = input.files[0];
-
-//   var reader = new FileReader();
-//   reader.onload = async function (e) {
-
-//     var byte = await DotNet.invokeMethodAsync("blazorwasm", "openMdFile", new Uint8Array(reader.result));;
-
-//     downloadBlob(byte, "test.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-//   }
-//   reader.readAsArrayBuffer(file)
-// }
