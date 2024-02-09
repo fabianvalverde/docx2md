@@ -1,0 +1,14 @@
+A <Code> block
+
+~~~~
+This is a 
+piece of code 
+in a block
+~~~~
+
+if you want to convert a code block from word.docx to kardown it should fullfill  this conditions
+
+- have 4 borderlines
+- shade 
+- small indentation
+

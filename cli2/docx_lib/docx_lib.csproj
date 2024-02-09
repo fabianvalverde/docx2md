@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Mammoth" Version="1.4.0" />
+    <PackageReference Include="Markdig" Version="0.30.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Html2OpenXml\HtmlToOpenXml.csproj" />
+  </ItemGroup>
+</Project>

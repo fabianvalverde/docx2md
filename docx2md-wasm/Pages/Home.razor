@@ -1,0 +1,184 @@
+﻿@using docx_lib;
+@using System.IO;
+@using System.IO.Compression;
+@using System.Text.Json;
+@using System.Text;
+@inject IJSRuntime JS;
+
+@page "/"
+<div class="container">
+    <h1>Convertidor de Archivos DOCX ↔ Markdown</h1>
+
+    <div class="dropzone @HoverClass"
+     @ondragenter="OnDragEnter"
+     @ondragleave="OnDragLeave" @ondragover="OnDragEnter">
+        <input type="file" id="fileInput" onchange="prueba(this)" accept=".docx, .md, .zip">
+    </div>
+    <button id="convertButton" onclick="@ShowPreview">Convertir</button>
+</div>
+
+@code{
+    private string HoverClass = string.Empty;
+
+    void OnDragEnter(DragEventArgs e) => HoverClass = "hover";
+    void OnDragLeave(DragEventArgs e) => HoverClass = string.Empty;
+
+    private async Task ShowPreview() => await JS.InvokeVoidAsync(
+    "ejecutar");
+
+    [JSInvokable]
+    public static byte[] openDocxZipFile(byte[] file, string name)
+    {
+        return docxToZipMd(file, name).Result;
+    }
+
+    public static async Task<byte[]> docxToZipMd(byte[] file, string name)
+    {
+        MemoryStream outStream = new MemoryStream();
+
+        Dictionary<string, Stream> images = new Dictionary<string, Stream>();
+
+        using (MemoryStream data = new MemoryStream(file))
+        {
+            await DgDocx.docx_to_md(data, outStream, images);
+            @* StreamReader reader = new StreamReader(outStream);
+            md = reader.ReadToEnd(); *@
+        }
+
+        MemoryStream zipStream = new MemoryStream();
+        using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+        {
+            //The entry already created in the .zip
+            ZipArchiveEntry documentEntry = zipArchive.CreateEntry($"DGConvertor/Articles/{name.Replace(".docx", "")}.md");
+            using (Stream entryStream = documentEntry.Open())
+            {
+                try
+                {
+                    outStream.Position = 0;
+                    //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
+                    await outStream.CopyToAsync(entryStream);
+                    //entryStream.Write(bytes);
+                    entryStream.Close();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+            foreach (KeyValuePair<string, Stream> img in images)
+            {
+                ZipArchiveEntry imagesEntry = zipArchive.CreateEntry($"DGConvertor/Images/{img.Key}");
+                using (Stream entryStream = imagesEntry.Open())
+                {
+                    try
+                    {
+                        img.Value.Position = 0;
+                        await img.Value.CopyToAsync(entryStream);
+                        entryStream.Close();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+            }
+        }
+        return zipStream.ToArray();
+    }
+
+    [JSInvokable]
+    public static byte[] openMdZipFile(object[] mdObject, string images)
+    {
+        //var jarray = (JsonElement)test;
+        //Console.WriteLine(jarray[0].GetProperty("src").GetString());
+        return convertToZipDocx(mdObject, images).Result;
+    }
+
+    public static async Task<byte[]> convertToZipDocx(object[] mdObject, string images)
+    {
+        string json = JsonSerializer.Serialize(mdObject);
+        JsonElement[] mdFiles = JsonSerializer.Deserialize<JsonElement[]>(json) ?? new JsonElement[0];
+
+        try
+        {
+            Dictionary<string, MemoryStream> dictionary = new Dictionary<string, MemoryStream>();
+
+
+            await DgDocx.md_to_docx(mdFiles!, images, dictionary);
+
+            MemoryStream zipStream = new MemoryStream();
+            //The .zip file stored in the zipStream
+            using (ZipArchive zipArchive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+            {
+                for (int i = 0; i < dictionary.Count; i++)
+                {
+                    //The entry already created in the .zip
+                    ZipArchiveEntry entry = zipArchive.CreateEntry($"DGConvertor/Articles/{dictionary.ElementAt(i).Key.Replace("articles/", "").Replace(".md", "")}.docx");
+                    using (Stream entryStream = entry.Open())
+                    {
+                        try
+                        {
+                            dictionary.ElementAt(i).Value.Position = 0;
+                            //byte[] bytes = Encoding.ASCII.GetBytes(mdFiles[i]);
+                            await dictionary.ElementAt(i).Value.CopyToAsync(entryStream);
+                            //entryStream.Write(bytes);
+                            entryStream.Close();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+                    }
+                }
+            }
+            return zipStream.ToArray();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new byte[] { };
+        }
+
+    }
+
+    [JSInvokable]
+    public static string openDocxZipFile2(byte[] file, string name)
+    {
+        return docxToZipHtml(file, name).Result;
+    }
+
+    public static async Task<string> docxToZipHtml(byte[] file, string name)
+    {
+        StringBuilder html = new StringBuilder();
+        string htmlFinal;
+
+        using (MemoryStream data = new MemoryStream(file))
+        {
+            await DgDocx.docx_to_html(data, html, name);
+            @* StreamReader reader = new StreamReader(outStream);
+            md = reader.ReadToEnd(); *@
+            htmlFinal = html.ToString();
+        }
+        return htmlFinal;
+    }
+
+    [JSInvokable]
+    public static byte[] openMdFile(byte[] file)
+    {
+        return convertToDocx(file).Result;//Returns a stream
+    }
+
+    public static async Task<byte[]> convertToDocx(byte[] data)
+    {
+
+        string stringData = Encoding.UTF8.GetString(data);
+
+        var outStream = new MemoryStream();
+
+        await DgDocx.md_to_docx(stringData, outStream);
+
+        byte[] outData = outStream.ToArray();
+
+        return outData;
+    }
+}
