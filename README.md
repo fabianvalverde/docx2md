@@ -14,3 +14,7 @@ Articles folder will keep .md files and images will keep the attachments.
 ## docx to md
 
 For this the .docx file is enough.
+
+## To check the project
+
+https://fabianvalverde.github.io/publish-docx2md/
