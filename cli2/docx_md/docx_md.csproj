@@ -11,4 +11,8 @@
     <ProjectReference Include="..\docx_lib\docx_lib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="test_results\" />
+  </ItemGroup>
+
 </Project>
