@@ -16,4 +16,9 @@
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="input_tests\" />
+    <Folder Include="output_tests\" />
+  </ItemGroup>
+
 </Project>

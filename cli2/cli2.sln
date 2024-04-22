@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "docx_md", "docx_md\docx_md.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HtmlToOpenXml", "Html2OpenXml\HtmlToOpenXml.csproj", "{1A2BF64C-EDEF-4F94-997A-BF14885C0C36}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "docx_libTests", "docx_libTests\docx_libTests.csproj", "{054BFD67-F6C6-4AB3-A603-ED8031F50AFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{1A2BF64C-EDEF-4F94-997A-BF14885C0C36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A2BF64C-EDEF-4F94-997A-BF14885C0C36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A2BF64C-EDEF-4F94-997A-BF14885C0C36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{054BFD67-F6C6-4AB3-A603-ED8031F50AFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{054BFD67-F6C6-4AB3-A603-ED8031F50AFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{054BFD67-F6C6-4AB3-A603-ED8031F50AFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{054BFD67-F6C6-4AB3-A603-ED8031F50AFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

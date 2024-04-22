@@ -1,3 +1,4 @@
+import * as JSZip from './jszip.min.js';
 var fileSaved;
 
 window.prueba = (input) => {
@@ -11,7 +12,7 @@ window.ejecutar = () => {
     } else if (fileSaved.name.endsWith('.md')) {
         toDocx(fileSaved);
     } else {
-        toDocxZip(fileSaved);
+        toDocx(fileSaved);
     }
 }
 
@@ -47,7 +48,7 @@ function toHtml(file) {
 //-------------------------------------------------
 async function toDocx(file) {
 
-    if (file.type == "application/zip") {
+    if (file.name.endsWith('.zip')) {
         const jszip = new window.JSZip();
         const decoder = new TextDecoder();
         var mdString = [];
