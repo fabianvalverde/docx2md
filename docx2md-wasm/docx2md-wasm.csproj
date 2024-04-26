@@ -13,5 +13,6 @@
 
     <ItemGroup>
 		<ProjectReference Include="..\cli2\docx_lib\docx_lib.csproj" />
+		<ProjectReference Include="..\cli2\Html2OpenXml\HtmlToOpenXml.csproj" />
 	</ItemGroup>
 </Project>
