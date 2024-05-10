@@ -56,8 +56,8 @@ namespace docx_lib
 
                         if (text is Break) { constructorBase += "\n"; continue; }
                         //checkbox
-                        if (text.InnerText == "☐") { constructorBase = " [ ]"; continue; }
-                        if (text.InnerText == "☒") { constructorBase = " [X]"; continue; }
+                        if (text.InnerText == "☐") { constructorBase = "- [ ]"; continue; }
+                        if (text.InnerText == "☒") { constructorBase = "- [X]"; continue; }
 
                         /// Hyperlink
                         if (links.Count() > 0 && links.Count() > linksCount)

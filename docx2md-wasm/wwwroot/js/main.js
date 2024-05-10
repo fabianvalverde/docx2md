@@ -20,7 +20,6 @@ window.ejecutar = () => {
 // Function below is to convert docx to md
 //-------------------------------------------------
 function toMd(file) {
-
     var reader = new FileReader();
     reader.onload = async function (e) {
 

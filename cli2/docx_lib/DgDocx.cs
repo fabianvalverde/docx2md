@@ -73,7 +73,7 @@ public class DgDocx
 
         StringBuilder textBuilder = new StringBuilder();
         StyleDefinitionsPart styleDefinitionsPart = wordDoc.MainDocumentPart.StyleDefinitionsPart;
-
+        hyperlinks = wordDoc.MainDocumentPart.HyperlinkRelationships;
         Body body = mainPart.Document.Body;
 
         if (body != null)
