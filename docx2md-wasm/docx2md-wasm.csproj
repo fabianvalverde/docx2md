@@ -11,6 +11,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.1" PrivateAssets="all" />
   </ItemGroup>
 
+	<PropertyGroup>
+		<StaticWebAssetBasePath>samples</StaticWebAssetBasePath>
+	</PropertyGroup>
+	
     <ItemGroup>
 		<ProjectReference Include="..\cli2\docx_lib\docx_lib.csproj" />
 		<ProjectReference Include="..\cli2\Html2OpenXml\HtmlToOpenXml.csproj" />

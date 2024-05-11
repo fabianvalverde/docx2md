@@ -14,3 +14,11 @@
     background-color: #fff;
     padding: 20px;
 }
+
+.download-links {
+    text-align: center;
+}
+
+.download-links a {
+    margin: 25px 20px;
+}
