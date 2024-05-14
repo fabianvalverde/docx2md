@@ -25,7 +25,7 @@ function toMd(file) {
 
         var zipBytes = await DotNet.invokeMethodAsync("docx2md-wasm", "openDocxZipFile", new Uint8Array(reader.result), file.name);
 
-        downloadBlob(zipBytes, 'testMd.zip', 'application/octet-stream');
+        downloadBlob(zipBytes, 'MarkdownFiles.zip', 'application/octet-stream');
     };
     reader.readAsArrayBuffer(file);
 }
@@ -96,7 +96,7 @@ async function toDocx(file) {
 
             var zipBytes = await DotNet.invokeMethodAsync("docx2md-wasm", "openMdZipFile", mdString, jsonString);
 
-            downloadBlob(zipBytes, 'test.zip', 'application/octet-stream');
+            downloadBlob(zipBytes, 'WordFiles.zip', 'application/octet-stream');
         })
     } else {
         var reader = new FileReader();

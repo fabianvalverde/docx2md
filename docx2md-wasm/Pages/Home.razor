@@ -6,22 +6,25 @@
 @inject IJSRuntime JS;
 
 @page "/"
-<div class="container">
-    <h1>Convertidor de Archivos DOCX ↔ Markdown</h1>
+<div class="container text-center">
+    <h1>DOCX ↔ Markdown</h1>
+    <h2>File Convertor</h2>
 
-    <div class="dropzone @HoverClass"
-     @ondragenter="OnDragEnter"
-     @ondragleave="OnDragLeave" @ondragover="OnDragEnter">
-        <input type="file" id="fileInput" onchange="prueba(this)" accept=".docx, .md, .zip">
+    <div class="dropzone @HoverClass mx-auto" style="width: 80%;"
+         @ondragenter="OnDragEnter"
+         @ondragleave="OnDragLeave" @ondragover="OnDragEnter">
+        <input type="file" id="fileInput" onchange="prueba(this)" accept=".docx, .md, .zip" style="width: 100%;">
     </div>
-    <button id="convertButton" onclick="@ShowPreview">Convertir</button>
-    <div class="download-links">
-        <a href="samples/sample.zip" download="PruebaMarkdown.zip">
-            Descarga Prueba Markdown
-        </a>
-        <a href="samples/Sample.docx" download="PruebaDocx.docx">
-            Descarga Prueba Docx
-        </a>
+
+    <button id="convertButton" class="btn btn-primary mt-3" onclick="@ShowPreview">Convertir</button>
+
+    <div class="d-flex mt-3 gap-3">
+        <div class="w-50 d-flex justify-content-end">
+            <a href="samples/sample.zip" class="btn btn-secondary btn-sm" download="PruebaMarkdown.zip">Descarga Prueba Markdown</a>
+        </div>
+        <div class="w-50 d-flex justify-content-start">
+            <a href="samples/Sample.docx" class="btn btn-secondary btn-sm" download="PruebaDocx.docx">Descarga Prueba Docx</a>
+        </div>
     </div>
 </div>
 
